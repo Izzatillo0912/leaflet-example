@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style>
+        #map {
+            height: 100%;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+    var map = L.map('map').setView([51.505, -0.09], 13); // Boshlang'ich koordinatalar
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    // Yangi foydalanuvchi ikonini yaratish
+    var userIcon = L.icon({
+        iconUrl: 'https://www.svgrepo.com/show/134534/box.svg', // O'z rasm URL manzilingizni kiriting
+        iconSize: [35, 35], // Ikon o'lchamini belgilash
+        iconAnchor: [16, 32], // Ikonning tayanch nuqtasi
+        popupAnchor: [0, -32] // Popup joylashuvi
+    });
+
+    // Yangi qabul qiluvchi ikonini yaratish
+    var receiverIcon = L.icon({
+        iconUrl: 'https://www.freeiconspng.com/uploads/red-location-icon-map-png-4.png', // O'z rasm URL manzilingizni kiriting
+        iconSize: [32, 45], // Ikon o'lchamini belgilash
+        iconAnchor: [16, 32], // Ikonning tayanch nuqtasi
+        popupAnchor: [0, -32] // Popup joylashuvi
+    });
+
+    // Eski markerlarni saqlash uchun o'zgaruvchilar
+    var userMarker = null;
+    var receiverMarker = null;
+    var routeControl = null;
+
+    function updateLocation(lat, lon) {
+        // Eski foydalanuvchi markerini o'chirish
+        if (userMarker) {
+            map.removeLayer(userMarker);
+        }
+
+        // Yangi foydalanuvchi markerini yaratish
+        userMarker = L.marker([lat, lon], { icon: userIcon }).addTo(map);
+
+        // Xaritada foydalanuvchi markerini yangilash va zoom qilish
+        map.setView([lat, lon], 13);
+
+        // Eski qabul qiluvchi markerini o'chirish
+        if (receiverMarker) {
+            map.removeLayer(receiverMarker);
+        }
+
+        // Yangi qabul qiluvchi markerini yaratish
+        receiverMarker = L.marker([40.48690988384321, 71.76179801327785], { icon: receiverIcon }).addTo(map);
+
+        // Eski yo'l chizig'ini o'chirish
+        if (routeControl) {
+            map.removeControl(routeControl);
+        }
+
+        // Yangi yo'l chizig'ini yaratish
+        routeControl = L.Routing.control({
+            waypoints: [
+                L.latLng(lat, lon),
+                L.latLng(40.48690988384321, 71.76179801327785) // Qabul qiluvchi manzil koordinatalari
+            ],
+            routeWhileDragging: true,
+            lineOptions: {
+                styles: [
+                    { color: 'blue', weight: 4 } // Yo'l rangini ko'k va qalinligini oshirish
+                ]
+            },
+            showAlternatives: false, // O'ng chekkada yo'l ma'lumotlarini yashirish
+            createMarker: function() { return null; } // Yo'l haqida ma'lumot beruvchi markerlarni yashirish
+        }).addTo(map);
+    }
+
+    // JavaScript interfeysini Android WebView'ga taqdim etish
+    window.updateLocation = updateLocation;
+</script>
+</body>
+</html>
